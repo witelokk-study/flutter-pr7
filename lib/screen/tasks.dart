@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 class TasksScreen extends StatefulWidget {
   final List<Task> tasks;
   final VoidCallback onUpdate;
-  final Function(Task) onTaskTap;
+  final Function(int) onTaskTap;
 
   TasksScreen({required this.tasks, required this.onUpdate, required this.onTaskTap});
 
@@ -38,7 +38,9 @@ class _TasksScreenState extends State<TasksScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Scaffold(
+      appBar: AppBar(title: Text('Задачи')),
+      body: Column(
       children: [
         Padding(
           padding: EdgeInsets.all(16),
@@ -75,12 +77,16 @@ class _TasksScreenState extends State<TasksScreen> {
                   });
                   widget.onUpdate();
                 },
-                secondary: IconButton(icon: Icon(Icons.info), onPressed: () => widget.onTaskTap(task)),
+                secondary: IconButton(icon: Icon(Icons.info), onPressed: () {
+                  final idx = widget.tasks.indexOf(task);
+                  widget.onTaskTap(idx);
+                }),
               );
             }).toList(),
           ),
         ),
       ],
+    ),
     );
   }
 }

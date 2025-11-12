@@ -3,7 +3,7 @@ import '../task.dart';
 
 class HomeScreen extends StatefulWidget {
   final List<Task> tasks;
-  final Function(Task) onTaskTap;
+  final Function(int) onTaskTap;
 
   HomeScreen({required this.tasks, required this.onTaskTap});
 
@@ -14,6 +14,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Task Planner')),
+      body: Builder(builder: (context) {
     DateTime today = DateTime.now();
     List<Task> todayTasks = widget.tasks
         .where((task) =>
@@ -28,7 +31,9 @@ class _HomeScreenState extends State<HomeScreen> {
         Text('Задачи на сегодня',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         SizedBox(height: 16),
-        ...todayTasks.map((task) => ListTile(
+        ...todayTasks.map((task) {
+          final idx = widget.tasks.indexOf(task);
+          return ListTile(
               leading: Checkbox(
                   value: task.completed,
                   onChanged: (val) {
@@ -38,10 +43,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   }),
               title: Text(task.title),
               subtitle: Text(task.description),
-              onTap: () => widget.onTaskTap(task),
-            )),
+              onTap: () => widget.onTaskTap(idx),
+            );
+        }),
         if (todayTasks.isEmpty) Center(child: Text('Сегодня задач нет!')),
       ],
+    );
+      }),
     );
   }
 }

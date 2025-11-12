@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../task.dart';
 import 'package:intl/intl.dart';
 
@@ -44,13 +45,17 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     widget.task.description = _descController.text;
     widget.task.date = _date;
     widget.onUpdate();
-    Navigator.pop(context);
+    
+    context.pop();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Детали задачи')),
+      appBar: AppBar(
+        leading: BackButton(onPressed: () => context.pop()),
+        title: Text('Детали задачи'),
+      ),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Column(

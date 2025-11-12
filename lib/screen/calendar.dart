@@ -5,7 +5,7 @@ import 'package:table_calendar/table_calendar.dart';
 
 class CalendarScreen extends StatefulWidget {
   final List<Task> tasks;
-  final Function(Task) onTaskTap;
+  final Function(int) onTaskTap;
 
   CalendarScreen({required this.tasks, required this.onTaskTap});
 
@@ -44,7 +44,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Scaffold(
+      appBar: AppBar(title: Text('Календарь')),
+      body: Column(
       children: [
         TableCalendar<Task>(
           firstDay: DateTime(2020),
@@ -72,6 +74,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           child: _buildTaskList(),
         ),
       ],
+    ),
     );
   }
 
@@ -94,7 +97,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
               });
             },
           ),
-          onTap: () => widget.onTaskTap(task),
+          onTap: () {
+            final idx = widget.tasks.indexOf(task);
+            widget.onTaskTap(idx);
+          },
         );
       },
     );
