@@ -7,65 +7,90 @@ import 'screen/stats.dart';
 import 'task.dart';
 
 void main() {
-  runApp(TaskPlannerApp());
+  final appState = AppState();
+  runApp(TaskPlannerApp(appState: appState));
+}
+
+class AppState extends ChangeNotifier {
+  final List<Task> tasks = [];
+
+  void notify() => notifyListeners();
 }
 
 class TaskPlannerApp extends StatelessWidget {
+  final AppState appState;
+  TaskPlannerApp({required this.appState});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Task Planner',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: MainScreen(),
+      home: TabPage(index: 0, appState: appState),
     );
   }
 }
 
-class MainScreen extends StatefulWidget {
+class TabPage extends StatefulWidget {
+  final int index;
+  final AppState appState;
+  TabPage({required this.index, required this.appState});
+
   @override
-  _MainScreenState createState() => _MainScreenState();
+  _TabPageState createState() => _TabPageState();
 }
 
-class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
-
-  List<Task> tasks = [];
-
-  late List<Widget> _screens;
+class _TabPageState extends State<TabPage> {
+  late int _selectedIndex;
 
   @override
   void initState() {
     super.initState();
-    _screens = [
-      HomeScreen(tasks: tasks, onTaskTap: _openTaskDetail),
-      TasksScreen(tasks: tasks, onUpdate: _updateTasks, onTaskTap: _openTaskDetail),
-      CalendarScreen(tasks: tasks, onTaskTap: _openTaskDetail),
-      StatsScreen(tasks: tasks),
-    ];
+    _selectedIndex = widget.index;
+    widget.appState.addListener(_onAppState);
   }
 
-  void _updateTasks() {
-    setState(() {});
+  @override
+  void dispose() {
+    widget.appState.removeListener(_onAppState);
+    super.dispose();
   }
+
+  void _onAppState() => setState(() {});
 
   void _openTaskDetail(Task task) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => TaskDetailScreen(task: task, onUpdate: _updateTasks)),
+      MaterialPageRoute(builder: (context) => TaskDetailScreen(task: task, onUpdate: () => widget.appState.notify())),
     );
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    if (index == _selectedIndex) return;
+    
+    final newPage = TabPage(index: index, appState: widget.appState);
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => newPage,
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final screens = [
+      HomeScreen(tasks: widget.appState.tasks, onTaskTap: _openTaskDetail),
+      TasksScreen(tasks: widget.appState.tasks, onUpdate: () => widget.appState.notify(), onTaskTap: _openTaskDetail),
+      CalendarScreen(tasks: widget.appState.tasks, onTaskTap: _openTaskDetail),
+      StatsScreen(tasks: widget.appState.tasks),
+    ];
+
     return Scaffold(
       appBar: AppBar(title: Text('Task Planner')),
-      body: _screens[_selectedIndex],
+      body: screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
